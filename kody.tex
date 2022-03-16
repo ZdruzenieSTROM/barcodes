@@ -1,0 +1,62 @@
+\documentclass[a4paper, 11pt]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[slovak]{babel}
+\usepackage{amssymb}                        % matematické symboly
+\usepackage{amsmath}                        % matematické prostredia
+
+\usepackage{graphicx}                       % obrázky
+\usepackage{wrapfig}                        % wrap obrázkov
+
+\usepackage{tikz}                           % tikz obrázky
+\usepackage{calc}                           % tikz pocitanie
+\usetikzlibrary{positioning}                % tikz kreslenie
+\usepackage[noshellescape,latex,clean=mp]{gmp}         % metapost obrázky
+
+\usepackage{siunitx}
+
+\usepackage[shortlabels]{enumitem}
+\setlist[enumerate]{nosep}
+\setlist[itemize]{nosep}
+
+\parskip=0pt
+\parindent=0pt
+
+\newcount\timy
+\timy=57
+
+%--------------------------- Makrá ----------------------------%
+
+\input{makra-kody.tex}
+
+\begin{document}
+
+%-------------------------- Zadania --------------------------%
+
+\newcount\p
+\newcount\u
+\newcount\t
+
+\t=100
+\u=1
+
+\loop
+    \p=\the\t
+
+    {\loop
+        {\loop
+            \input{zadania/zadanie\the\u.tex}
+        \advance\p by 1
+        \ifnum\p<\numexpr\t+4
+        \repeat}
+
+    \advance\u by 1
+    \ifnum\u<49
+    \repeat}
+
+    \advance\t by 4
+\ifnum\t<\numexpr\timy+100
+\repeat
+
+\end{document}

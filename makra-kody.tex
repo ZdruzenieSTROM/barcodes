@@ -1,0 +1,93 @@
+\usepackage[paper=a4paper, vmargin=0cm, left=1.5cm, right=0.5cm]{geometry}
+
+\usepackage{calc}
+\usepackage{intcalc}
+
+\usepackage{rotating}
+\usepackage{pst-barcode}
+
+\usepackage{environ}
+
+\pagestyle{empty}
+
+%----------------------- Ciarove kody -----------------------%
+\newcommand{\barcode}{%
+    \controlsum{\the\p}
+    \begin{rotate}{-90}
+        \hspace{-95pt}
+        \ifnum\u<10
+            \LARGE{\the\p0\the\u\the\lastdigit}
+        \else
+            \LARGE{\the\p\the\u\the\lastdigit}
+        \fi
+    \end{rotate}
+    \begin{pspicture}(-1.6,5.1)
+        \ifnum\u<10
+            \psbarcode[rotate=90]{\the\p0\the\u\the\lastdigit}{width=1.8 height=0.4}{code128}
+        \else
+            \psbarcode[rotate=90]{\the\p\the\u\the\lastdigit}{width=1.8 height=0.4}{code128}
+        \fi
+    \end{pspicture}
+}
+
+%----------------------- Opravovatel -----------------------%
+\newcommand{\opravovatel}[1]{%
+    \begin{rotate}{-90}
+        \hspace{-112pt}
+        \Large{Opravovateľ \intcalcMod{#1}{5}}
+    \end{rotate}
+}
+
+%--------------------- Konstantna vyska ---------------------%
+\NewEnviron{vysledok}{}
+\NewEnviron{riesenie}{}
+
+\newtoks\label
+\newcount\rpos
+
+\NewEnviron{zadanie}{%
+\ifnum\u<41
+    \label={Úloha}
+    \rpos\numexpr\u
+\else\ifnum\u<45
+    \label={Hádanka}
+    \rpos\numexpr\u-40
+\else
+    \label={Hlavolam}
+    \rpos\numexpr\u-44
+\fi\fi
+\noindent
+\begin{minipage}[t][\textheight/4-(6pt)][t]{\textwidth}
+\rule{\textwidth}{1pt}
+\begin{minipage}[top][\textheight][t]{.85\textwidth}
+    \vspace{5pt}
+    \textbf{{\the\label} {\the\rpos}.}\hspace{5pt}\BODY
+\end{minipage}%
+\hfill
+\begin{minipage}[top][\textheight][t]{.09\textwidth}
+    \ifnum\p<\numexpr\timy+100\barcode\else\phantom{\barcode}\fi
+    \hspace{-70pt}
+    \opravovatel{\the\numexpr\u}
+\end{minipage}%
+\end{minipage}
+}
+
+
+%---------------------- Vypocet cisla ----------------------%
+\newcount\digitp
+\newcount\digits
+\newcount\digitt
+\newcount\digitd
+\newcount\digitj
+
+\newcount\lastdigit
+
+\newcommand{\controlsum}[1]{%
+    \digitj=\intcalcMod{(\the\u)}{10}                   % jednotky
+    \digitd=\intcalcMod{\intcalcDiv{\the\u}{10}}{10}    % desiatky
+    \digits=\intcalcMod{(#1)}{10}                       % stovky
+    \digitt=\intcalcMod{\intcalcDiv{#1}{10}}{10}        % tisícky
+    \digitp=\intcalcMod{\intcalcDiv{#1}{100}}{10}       % piata cifra
+
+    \global\lastdigit=\intcalcMod{\numexpr\digitp*5+\numexpr\digitt*1+\numexpr\digits*9+\numexpr\digitd*3+\numexpr\digitj*7}{10}
+}
