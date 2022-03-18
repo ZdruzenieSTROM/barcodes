@@ -2,7 +2,6 @@
 
 from itertools import starmap
 from operator import mul
-from sys import stdin
 from typing import Iterable
 
 
@@ -17,17 +16,19 @@ def digits(n: int) -> Iterable[int]:
 
 
 def stevkohash(n: int) -> int:
-    WEIGHTS = [5, 1, 9, 3, 7]
+    WEIGHTS = (7, 3, 9, 1, 5, )
 
-    return sum(starmap(mul, zip(digits(n), reversed(WEIGHTS)))) % 10
+    return sum(starmap(mul, zip(digits(n), WEIGHTS))) % 10
 
 
 def main() -> None:
-    for line in stdin:
+    for line in iter(input, ""):
         try:
-            print(stevkohash(int(line)))
+            n = int(line)
+
+            print(stevkohash(n))
         except ValueError:
-            pass
+            print("Format Error")
 
 
 if __name__ == "__main__":
