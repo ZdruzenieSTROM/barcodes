@@ -4,41 +4,78 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
+error()
+{
+    local MESSAGE="${1}"
+    local STATUS="${2}"
+
+    echo "${MESSAGE}" >> "/dev/stderr"
+    exit "${STATUS}"
+}
+
+setup()
+{
+    local BUILDDIR="${1}"
+    local BUILDTYPE="${2}"
+    local ARCHIVE="${3}"
+
+    unzip -o -qq -d "${BUILDDIR}" "${ARCHIVE}"
+
+    cp -t "${BUILDDIR}" "kody.tex" "makra-kody.tex"
+
+    local PROBLEM_FILES
+
+    case "${BUILDTYPE}" in
+        "MAMUT")
+            PROBLEM_FILES=(lahke.tex stredne.tex tazke.tex)
+            ;;
+        "LOMIHLAV")
+            PROBLEM_FILES=(ulohy.tex)
+            ;;
+        *)
+            error "Unknown build type" 1
+            ;;
+    esac
+
+    ./partition.py -o "${BUILDDIR}/zadania" "${PROBLEM_FILES[@]/#/${BUILDDIR}/}"
+}
+
 build()
 {
-    latex -interaction=batchmode kody.tex
+    local BUILDDIR="$1"
+
+    pushd "${BUILDDIR}"
+
+    latex -interaction=batchmode "kody.tex"
 
     # shellcheck source=/dev/null
     source kody+mp.sh
 
-    latex -interaction=batchmode kody.tex
+    latex -interaction=batchmode "kody.tex"
 
-    dvips  kody.dvi
-    ps2pdf kody.ps
+    dvips  -q "kody.dvi"
+    ps2pdf    "kody.ps"
+
+    popd
 }
 
 main()
 {
-    local BUILDDIR="build"
-    local ARCHIVE="Mamut 2020.zip"
+    if [[ "${#}" -lt 2 ]]; then
+        error "Usage: ${0} <MAMUT|LOMIHLAV> ARCHIVE" 1
+    fi
 
-    mkdir -p "$BUILDDIR"
-    unzip -o -q -d "$BUILDDIR" "$ARCHIVE"  > /dev/null
+    local BUILDTYPE="${1}"
+    local ARCHIVE="${2}"
 
-    ./partition.py \
-        -o "$BUILDDIR/zadania" \
-        "$BUILDDIR/lahke.tex" \
-        "$BUILDDIR/stredne.tex" \
-        "$BUILDDIR/tazke.tex"
+    local BUILDDIR
+    BUILDDIR="$( mktemp -d )"
 
-    cp "kody.tex"       "$BUILDDIR"
-    cp "makra-kody.tex" "$BUILDDIR"
+    setup "${BUILDDIR}" "${BUILDTYPE}" "${ARCHIVE}"
+    build "${BUILDDIR}" > "/dev/null"
 
-    pushd "$BUILDDIR" > /dev/null
-    build > /dev/null
-    popd > /dev/null
-
-    cp -t . "$BUILDDIR/kody.pdf"
+    cp -t "." "${BUILDDIR}/kody.pdf"
+    rm -r -f  "${BUILDDIR}"
 }
 
-main "$@"
+main "${@}"
