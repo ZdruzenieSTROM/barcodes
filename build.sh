@@ -33,11 +33,13 @@ setup()
             PROBLEM_FILES=(ulohy.tex)
             ;;
         *)
-            error "Unknown build type" 1
+            error "Unknown build type: ${BUILDTYPE}" 1
             ;;
     esac
 
-    ./partition.py -o "${BUILDDIR}/zadania" "${PROBLEM_FILES[@]/#/${BUILDDIR}/}"
+    utils/partition.py \
+        -o "${BUILDDIR}/zadania" \
+        "${PROBLEM_FILES[@]/#/${BUILDDIR}/}"
 }
 
 build()
@@ -46,15 +48,15 @@ build()
 
     pushd "${BUILDDIR}"
 
-    latex -interaction=batchmode "kody.tex"
+    latex "kody.tex"
 
     # shellcheck source=/dev/null
     source kody+mp.sh
 
-    latex -interaction=batchmode "kody.tex"
+    latex "kody.tex"
 
-    dvips  -q "kody.dvi"
-    ps2pdf    "kody.ps"
+    dvips -q "kody.dvi"
+    ps2pdf "kody.ps"
 
     popd
 }
@@ -62,17 +64,29 @@ build()
 main()
 {
     if [[ "${#}" -lt 2 ]]; then
-        error "Usage: ${0} <MAMUT|LOMIHLAV> ARCHIVE" 1
+        error "Usage: ${0} <MAMUT|LOMIHLAV> ARCHIVE [SILENT]" 1
     fi
 
     local BUILDTYPE="${1}"
     local ARCHIVE="${2}"
+    local SILENT
+
+    if [[ "${#}" -eq 3 ]] && [[ "${3}" == "SILENT" ]]; then
+        SILENT=true
+    else
+        SILENT=false
+    fi
 
     local BUILDDIR
     BUILDDIR="$( mktemp -d )"
 
     setup "${BUILDDIR}" "${BUILDTYPE}" "${ARCHIVE}"
-    build "${BUILDDIR}" > "/dev/null"
+
+    if "${SILENT}"; then
+        build "${BUILDDIR}" > "/dev/null"
+    else
+        build "${BUILDDIR}"
+    fi
 
     cp -t "." "${BUILDDIR}/kody.pdf"
     rm -r -f  "${BUILDDIR}"

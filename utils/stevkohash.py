@@ -5,14 +5,16 @@ from operator import mul
 from typing import Iterable
 
 
-def digits(n: int) -> Iterable[int]:
-    if not n:
+def digits(number: int) -> Iterable[int]:
+    if not number:
         yield 0
         return
 
-    while n:
-        yield n % 10
-        n //= 10
+    remainder = number
+
+    while remainder:
+        yield remainder % 10
+        remainder //= 10
 
 
 def stevkohash(n: int) -> int:
@@ -24,9 +26,10 @@ def stevkohash(n: int) -> int:
 def main() -> None:
     for line in iter(input, ""):
         try:
-            n = int(line)
+            number = int(line)
 
-            print(stevkohash(n))
+            print(stevkohash(number))
+
         except ValueError:
             print("Format Error")
 
