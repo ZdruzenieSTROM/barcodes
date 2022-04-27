@@ -45,7 +45,7 @@
 \newtoks\label
 \newcount\rpos
 
-\NewEnviron{zadanie}{%
+\NewEnviron{zadanie}[1][]{%
 \ifnum\u<41
     \label={Úloha}
     \rpos\numexpr\u

@@ -30,7 +30,7 @@ setup()
             PROBLEM_FILES=(lahke.tex stredne.tex tazke.tex)
             ;;
         "LOMIHLAV")
-            PROBLEM_FILES=(ulohy.tex)
+            PROBLEM_FILES=(ulohy.tex hadanky.tex hlavolamy.tex)
             ;;
         *)
             error "Unknown build type: ${BUILDTYPE}" 1
